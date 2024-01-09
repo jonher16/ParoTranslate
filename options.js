@@ -33,14 +33,58 @@ function loadTranslationHistory() {
         const historyContainer = document.getElementById('translation-history');
         const translations = result.translations || [];
 
-        translations.forEach(translation => {
+        historyContainer.innerHTML = ''; // Clear existing entries
+
+        translations.forEach((translation, index) => {
             const translationElement = document.createElement('div');
             translationElement.classList.add('translation-history-item');
-            translationElement.textContent = `${translation.originalText}\n${translation.translatedText}`;
+        
+            const originalTextLabel = document.createElement('strong');
+            originalTextLabel.textContent = 'Original: ';
+        
+            const originalTextSpan = document.createElement('span');
+            originalTextSpan.textContent = `${translation.originalText}\n`;
+            
+            const lineBreak = document.createElement('br');
+            const lineBreak2 = document.createElement('br');
+
+            const translatedTextLabel = document.createElement('strong');
+            translatedTextLabel.textContent = 'Translation: ';
+        
+            const translatedTextSpan = document.createElement('span');
+            translatedTextSpan.textContent = translation.translatedText;
+        
+            // Append the labels and spans to the translation element
+            translationElement.appendChild(originalTextLabel);
+            translationElement.appendChild(originalTextSpan);
+            translationElement.appendChild(lineBreak);
+            translationElement.appendChild(lineBreak2);
+            translationElement.appendChild(translatedTextLabel);
+            translationElement.appendChild(translatedTextSpan);
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'X';
+            deleteButton.classList.add('delete-button');
+            deleteButton.onclick = function() {
+                removeTranslation(index);
+            };
+            translationElement.appendChild(deleteButton);
+
             historyContainer.appendChild(translationElement);
         });
     });
 }
+
+function removeTranslation(index) {
+    chrome.storage.local.get(['translations'], function(result) {
+        let translations = result.translations || [];
+        translations.splice(index, 1); // Remove the item at the specific index
+        chrome.storage.local.set({ translations: translations }, function() {
+            loadTranslationHistory(); // Reload the history to reflect changes
+        });
+    });
+}
+
 
 // Call the function when the DOM content has been loaded
 document.addEventListener('DOMContentLoaded', loadTranslationHistory);
