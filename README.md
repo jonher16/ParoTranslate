@@ -1,4 +1,4 @@
-# Text Translator Chrome Extension
+# ParoTranslate Korean/English Translation Chrome Extension
 
 This Chrome extension allows users to quickly translate selected text on a webpage using a keyboard shortcut. Translations are performed via the MyMemory API and can be saved and downloaded as a CSV file.
 
