@@ -2,7 +2,7 @@ document.addEventListener('keydown', function(event) {
     if (event.ctrlKey && event.key === 'q') {
         let selectedText = window.getSelection().toString();
         if (selectedText) {
-            translateText(selectedText, 'ko', 'es');
+            translateText(selectedText, 'ko', 'en');
         }
     }
 });
@@ -45,6 +45,31 @@ function showTranslationPopup(originalText, translatedText) {
         <div id="original-text" style="margin-bottom: 10px;"><strong>Original:</strong> ${originalText}</div>
         <div id="translated-text" style="margin-bottom: 10px;"><strong>Translated:</strong> ${translatedText}</div>
     `;
+
+    const saveButton = document.createElement('button');
+    saveButton.innerText = 'Save';
+    saveButton.style.backgroundColor = '#5c6bc0'; // Set the background color
+    saveButton.style.color = 'white'; // Set the text color
+    saveButton.style.border = 'none'; // Remove the border
+    saveButton.style.padding = '10px 20px'; // Add some padding
+    saveButton.style.borderRadius = '5px'; // Round the corners
+    saveButton.style.cursor = 'pointer'; // Change cursor on hover
+    saveButton.style.marginTop = '10px'; // Add margin on the top
+    saveButton.style.fontSize = '14px'; // Set font size
+    saveButton.onmouseover = function() {
+        this.style.backgroundColor = '#3f51b5'; // Lighten the color on hover
+    };
+    saveButton.onmouseout = function() {
+        this.style.backgroundColor = '#5c6bc0'; // Return to original color
+    };
+    saveButton.onclick = function() {
+        saveTranslation(originalText, translatedText);
+        popup.remove();
+    };
+    popup.appendChild(saveButton);
+
+
+
     document.body.appendChild(popup);
 
     // Close the popup when clicking outside of it
@@ -55,3 +80,36 @@ function showTranslationPopup(originalText, translatedText) {
     }, { capture: true });
 }
 
+// Send a message to the background script to save data
+function saveTranslation(originalText, translatedText) {
+    chrome.runtime.sendMessage({
+        action: "saveTranslation",
+        data: { originalText, translatedText }
+    });
+    console.log("Saving translation");
+}
+
+
+function downloadTranslations() {
+    chrome.storage.local.get({ translations: [] }, function(result) {
+        const translations = result.translations;
+        let csvContent = 'data:text/csv;charset=utf-8,';
+        csvContent += 'Texto Original,Traducción\n'; // Encabezados del CSV
+
+        // Agregar cada traducción al contenido CSV
+        translations.forEach(function(rowArray) {
+            let row = `${rowArray.originalText},${rowArray.translatedText}`;
+            csvContent += row + '\n';
+        });
+
+        // Crear un enlace para descargar el CSV
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement('a');
+        link.setAttribute('href', encodedUri);
+        link.setAttribute('download', 'translations.csv');
+        document.body.appendChild(link);
+
+        // Descargar el archivo CSV
+        link.click();
+    });
+}

@@ -4,14 +4,16 @@
   "version": "1.0",
   "permissions": [
     "activeTab",
-    "scripting"
+    "scripting",
+    "storage"
   ],
   "action": {
     "default_icon": {
       "16": "icon.png",
       "48": "icon.png",
       "128": "icon.png"
-    }
+    },
+    "default_popup": "options.html"
   },
   "background": {
     "service_worker": "background.js"
